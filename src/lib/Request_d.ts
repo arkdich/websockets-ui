@@ -1,10 +1,12 @@
+import { User } from '../db/user-db_d'
+
 export type WSRequest<Body = unknown> = {
   type: RequestType
   data: Body
   id: 0
 }
 
-export type RequestType = 'reg'
+export type RequestType = 'reg' | 'update_winners' | 'create_room'
 
 export type Registration = {
   name: string
@@ -17,3 +19,10 @@ export type RegistrationResponse = {
   error: boolean
   errorText: string
 }
+
+export type UpdateWinners = {
+  name: User['name']
+  wins: number
+}
+
+export type CreateRoom = {}

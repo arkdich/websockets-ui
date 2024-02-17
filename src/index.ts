@@ -1,8 +1,8 @@
 import 'dotenv/config'
 import { httpServer } from './http-server/index.js'
-import { WebSocket, WebSocketServer } from 'ws'
-import { Registration, WSRequest } from './lib/Request_d.js'
-import { UserDb } from './db/user-db.js'
+import { WebSocketServer } from 'ws'
+import { WSRequest } from './lib/Request_d.js'
+import { handleWsRequest } from './api/handle-ws-request.js'
 
 const HTTP_PORT = Number(process.env.HTTP_PORT) || 8181
 const WS_PORT = Number(process.env.WS_PORT) || 3000
@@ -13,51 +13,24 @@ httpServer.on('listening', () => {
 
 httpServer.listen(HTTP_PORT)
 
-const userDb = new UserDb()
 const wsServer = new WebSocketServer({ port: WS_PORT })
 
 wsServer.on('listening', () => {
   console.log(`Websocket server running at ws://localhost:${WS_PORT}`)
 })
 
-wsServer.on('connection', (server, req) => {
-  server.on('message', (buffer) => {
+wsServer.on('connection', (ws) => {
+  ws.send(JSON.stringify({ message: 'Successfully connected' }))
+
+  ws.on('message', (buffer) => {
     try {
       const { type, data } = JSON.parse(buffer.toString()) as WSRequest<string>
 
-      if (type === 'reg') {
-        const { name, password } = (
-          typeof data === 'string' ? JSON.parse(data) : data
-        ) as Registration
-
-        console.log(data)
-        console.log(name, password)
-
-        if (!name || !password) {
-          throw new Error('Invalid data')
-        }
-
-        const user = userDb.add({ name, password })
-
-        const response: WSRequest<string> = {
-          type: 'reg',
-          data: JSON.stringify({
-            name: user.name,
-            index: 0,
-            error: false,
-            errorText: '',
-          }),
-          id: 0,
-        }
-
-        server.send(JSON.stringify(response))
-      }
+      handleWsRequest(ws, type, data)
     } catch (err: any) {
-      server.send(JSON.stringify({ message: err.message }))
+      ws.send(JSON.stringify({ message: err.message }))
     }
   })
-
-  server.send(JSON.stringify({ message: 'Successfully connected' }))
 })
 
 // const client = new WebSocket('ws://localhost:3000')
