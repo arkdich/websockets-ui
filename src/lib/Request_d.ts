@@ -1,4 +1,10 @@
+import WebSocket from 'ws'
 import { User } from '../db/user-db_d'
+
+export type Route = {
+  type: RequestType
+  handler: (ws: WebSocket, data?: unknown) => void
+}
 
 export type WSRequest<Body = unknown> = {
   type: RequestType
@@ -6,7 +12,11 @@ export type WSRequest<Body = unknown> = {
   id: 0
 }
 
-export type RequestType = 'reg' | 'update_winners' | 'create_room'
+export type RequestType =
+  | 'reg'
+  | 'update_winners'
+  | 'create_room'
+  | 'update_room'
 
 export type Registration = {
   name: string
@@ -26,3 +36,11 @@ export type UpdateWinners = {
 }
 
 export type CreateRoom = {}
+
+export type UpdateRoom = {
+  roomId: number
+  roomUsers: {
+    name: string
+    index: number
+  }[]
+}

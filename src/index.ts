@@ -32,21 +32,3 @@ wsServer.on('connection', (ws) => {
     }
   })
 })
-
-// const client = new WebSocket('ws://localhost:3000')
-
-// client
-//   .on('open', () => {
-//     console.log('Client connected')
-
-//     client.send(
-//       JSON.stringify({
-//         type: 'reg',
-//         data: { name: '22424242', password: '4242224' },
-//         id: 0,
-//       })
-//     )
-//   })
-//   .on('message', (data) => {
-//     console.log('Message from server:', data.toString())
-//   })

@@ -1,16 +1,14 @@
-import { registerUser } from './register-user.ts'
+import { RequestType, Route } from '../lib/Request_d.ts'
+import { createRoom } from './create-room.ts'
+import { reg } from './reg.ts'
 
-export const routes = {
+export const routes: Partial<Record<RequestType, Route>> = {
   reg: {
     type: 'reg',
-    handler: registerUser,
-  },
-  update_winners: {
-    type: 'update_winners',
-    handler: async () => {},
+    handler: reg,
   },
   create_room: {
     type: 'create_room',
-    handler: async () => {},
+    handler: createRoom,
   },
 }
