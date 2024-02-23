@@ -1,20 +1,27 @@
 import WebSocket from 'ws'
-import { setupRoom } from '../lib/setup-room.ts'
 import { ConnectedClients } from '../db/connected-clients.ts'
 import { updateRoom } from '../lib/update-room.ts'
-import { WSRequest } from '../lib/Request_d.ts'
+import { AddUserToRoom, WSRequest } from '../lib/Request_d.ts'
+import { RoomDb } from '../db/room-db.ts'
 
-export const createRoom = (ws: WebSocket) => {
+export const addUserToRoom = (ws: WebSocket, data: unknown) => {
+  const { indexRoom } = (
+    typeof data === 'string' ? JSON.parse(data) : data
+  ) as AddUserToRoom
+
   const clients = new ConnectedClients()
   const user = clients.get(ws)
+
+  console.log(data)
 
   if (!user) {
     throw new Error('User not found')
   }
 
-  setupRoom(ws)
-  const availableRooms = updateRoom(ws)
+  const room = new RoomDb()
+  room.addUser(indexRoom, ws)
 
+  const availableRooms = updateRoom(ws)
   const updateRoomResponse: WSRequest<string> = {
     type: 'update_room',
     data: JSON.stringify(availableRooms),

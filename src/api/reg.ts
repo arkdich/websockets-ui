@@ -51,7 +51,7 @@ export const reg = (ws: WebSocket, data: unknown) => {
 
   ws.send(JSON.stringify(updateWinnersResponse))
 
-  const availableRooms = updateRoom()
+  const availableRooms = updateRoom(ws)
   const updateRoomResponse: WSRequest<string> = {
     type: 'update_room',
     data: JSON.stringify(availableRooms),

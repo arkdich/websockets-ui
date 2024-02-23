@@ -1,6 +1,6 @@
-import { User } from './user-db_d'
+import WebSocket from 'ws'
 
 export type Room = {
   id: number
-  users: Pick<User, 'id' | 'name'>[]
+  users: WebSocket[]
 }

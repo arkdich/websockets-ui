@@ -17,6 +17,7 @@ export type RequestType =
   | 'update_winners'
   | 'create_room'
   | 'update_room'
+  | 'add_user_to_room'
 
 export type Registration = {
   name: string
@@ -35,7 +36,9 @@ export type UpdateWinners = {
   wins: number
 }
 
-export type CreateRoom = {}
+export type AddUserToRoom = {
+  indexRoom: number
+}
 
 export type UpdateRoom = {
   roomId: number

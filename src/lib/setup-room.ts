@@ -1,11 +1,11 @@
+import WebSocket from 'ws'
 import { RoomDb } from '../db/room-db.ts'
-import { User } from '../db/user-db_d'
 
-export const setupRoom = (user: User) => {
+export const setupRoom = (ws: WebSocket) => {
   const roomDb = new RoomDb()
 
   const room = roomDb.create()
-  roomDb.addUser(room.id, user)
+  roomDb.addUser(room.id, ws)
 
   return room
 }

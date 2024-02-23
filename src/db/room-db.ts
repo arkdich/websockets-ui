@@ -1,5 +1,5 @@
+import WebSocket from 'ws'
 import { Room } from './room-db_d'
-import { User } from './user-db_d'
 
 export class RoomDb {
   private static rooms: Room[] = []
@@ -13,14 +13,14 @@ export class RoomDb {
     return room
   }
 
-  addUser(roomId: number, users: User) {
+  addUser(roomId: number, ws: WebSocket) {
     const room = RoomDb.rooms.find((room) => room.id === roomId)
 
     if (!room) {
       throw new Error(`Room with id ${roomId} not found`)
     }
 
-    room.users.push(users)
+    room.users.push(ws)
 
     return room
   }

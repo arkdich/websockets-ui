@@ -1,8 +1,8 @@
 import 'dotenv/config'
-import { httpServer } from './http-server/index.js'
+import { httpServer } from './http-server/index.ts'
 import { WebSocketServer } from 'ws'
-import { WSRequest } from './lib/Request_d.js'
-import { handleWsRequest } from './api/handle-ws-request.js'
+import { WSRequest } from './lib/Request_d.ts'
+import { handleWsRequest } from './api/handle-ws-request.ts'
 
 const HTTP_PORT = Number(process.env.HTTP_PORT) || 8181
 const WS_PORT = Number(process.env.WS_PORT) || 3000
