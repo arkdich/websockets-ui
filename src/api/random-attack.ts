@@ -1,9 +1,8 @@
-import WebSocket from 'ws'
-import { RandomAttack } from '../lib/Request_d.ts'
+import { RandomAttack, RequestParams } from '../lib/Request_d.ts'
 import { getRandomCoordinate } from '../lib/utils.ts'
 import { attack } from './attack.ts'
 
-export const randomAttack = (ws: WebSocket, data: unknown) => {
+export const randomAttack = ({ ws, data }: RequestParams) => {
   const { gameId, indexPlayer } = (
     typeof data === 'string' ? JSON.parse(data) : data
   ) as RandomAttack
@@ -11,5 +10,5 @@ export const randomAttack = (ws: WebSocket, data: unknown) => {
   const x = getRandomCoordinate()
   const y = getRandomCoordinate()
 
-  attack(ws, JSON.stringify({ gameId, indexPlayer, x, y }))
+  attack({ ws, data: JSON.stringify({ gameId, indexPlayer, x, y }) })
 }

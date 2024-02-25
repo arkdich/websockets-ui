@@ -13,5 +13,5 @@ export const handleWsRequest = (
     throw new Error(`${type} is invalid client message type`)
   }
 
-  requestHandler.handler(ws, data)
+  requestHandler.handler({ ws, data })
 }

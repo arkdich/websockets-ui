@@ -1,11 +1,10 @@
-import WebSocket from 'ws'
 import { setupRoom } from '../lib/setup-room.ts'
 import { ConnectedClients } from '../db/connected-clients.ts'
 import { updateRoom } from '../lib/update-room.ts'
-import { WSRequest } from '../lib/Request_d.ts'
+import { RequestParams, WSRequest } from '../lib/Request_d.ts'
 import { getWsClients } from '../index.ts'
 
-export const createRoom = (ws: WebSocket) => {
+export const createRoom = ({ ws }: RequestParams) => {
   const clients = new ConnectedClients()
   const user = clients.get(ws)
 

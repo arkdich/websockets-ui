@@ -1,12 +1,12 @@
 import WebSocket from 'ws'
 import { ConnectedClients } from '../db/connected-clients.ts'
 import { updateRoom } from '../lib/update-room.ts'
-import { AddUserToRoom, WSRequest } from '../lib/Request_d.ts'
+import { AddUserToRoom, RequestParams, WSRequest } from '../lib/Request_d.ts'
 import { RoomDb } from '../db/room-db.ts'
 import { GameDb } from '../db/game-db.ts'
 import { getWsClients } from '../index.ts'
 
-export const addUserToRoom = (ws: WebSocket, data: unknown) => {
+export const addUserToRoom = ({ ws, data }: RequestParams) => {
   const { indexRoom } = (
     typeof data === 'string' ? JSON.parse(data) : data
   ) as AddUserToRoom

@@ -3,7 +3,12 @@ import { User } from '../db/user-db_d'
 
 export type Route = {
   type: RequestType
-  handler: (ws: WebSocket, data?: unknown) => void
+  handler: (params: RequestParams) => void
+}
+
+export type RequestParams = {
+  ws: WebSocket
+  data?: unknown
 }
 
 export type WSRequest<Body = unknown> = {

@@ -1,10 +1,9 @@
-import WebSocket from 'ws'
 import { ConnectedClients } from '../db/connected-clients.ts'
-import { AddShips, WSRequest } from '../lib/Request_d.ts'
+import { AddShips, RequestParams, WSRequest } from '../lib/Request_d.ts'
 import { RoomDb } from '../db/room-db.ts'
 import { GameDb } from '../db/game-db.ts'
 
-export const addShips = (ws: WebSocket, data: unknown) => {
+export const addShips = ({ data }: RequestParams) => {
   const { gameId, ships, indexPlayer } = (
     typeof data === 'string' ? JSON.parse(data) : data
   ) as AddShips

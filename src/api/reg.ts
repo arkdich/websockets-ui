@@ -1,12 +1,11 @@
-import WebSocket from 'ws'
-import { Registration, WSRequest } from '../lib/Request_d.ts'
+import { Registration, RequestParams, WSRequest } from '../lib/Request_d.ts'
 import { ConnectedClients } from '../db/connected-clients.ts'
 import { updateWinners } from '../lib/update-winners.ts'
 import { handleUser } from '../lib/handle-user.ts'
 import { updateRoom } from '../lib/update-room.ts'
 import { getWsClients } from '../index.ts'
 
-export const reg = (ws: WebSocket, data: unknown) => {
+export const reg = ({ ws, data }: RequestParams) => {
   const { name, password } = (
     typeof data === 'string' ? JSON.parse(data) : data
   ) as Registration

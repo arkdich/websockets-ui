@@ -1,5 +1,10 @@
-import WebSocket from 'ws'
-import { Attack, AttackResponse, Finish, WSRequest } from '../lib/Request_d.ts'
+import {
+  Attack,
+  AttackResponse,
+  Finish,
+  RequestParams,
+  WSRequest,
+} from '../lib/Request_d.ts'
 import { RoomDb } from '../db/room-db.ts'
 import { GameDb } from '../db/game-db.ts'
 import { getClosestCells, isCoordinateMatches } from '../lib/utils.ts'
@@ -8,7 +13,7 @@ import { updateWinners } from '../lib/update-winners.ts'
 import { getWsClients } from '../index.ts'
 import { UserDb } from '../db/user-db.ts'
 
-export const attack = (ws: WebSocket, data: unknown) => {
+export const attack = ({ data }: RequestParams) => {
   const { gameId, indexPlayer, x, y } = (
     typeof data === 'string' ? JSON.parse(data) : data
   ) as Attack
@@ -109,21 +114,21 @@ export const attack = (ws: WebSocket, data: unknown) => {
         })
       )
     }
-
-    if (allShipsDestroyed) {
-      const userDb = new UserDb()
-      userDb.incrementWins(indexPlayer)
-
-      const winnersScore = updateWinners()
-      const updateWinnersResponse: WSRequest<string> = {
-        type: 'update_winners',
-        data: JSON.stringify(winnersScore),
-        id: 0,
-      }
-
-      for (const client of getWsClients()) {
-        client.send(JSON.stringify(updateWinnersResponse))
-      }
-    }
   })
+
+  if (allShipsDestroyed) {
+    const userDb = new UserDb()
+    userDb.incrementWins(indexPlayer)
+
+    const winnersScore = updateWinners()
+    const updateWinnersResponse: WSRequest<string> = {
+      type: 'update_winners',
+      data: JSON.stringify(winnersScore),
+      id: 0,
+    }
+
+    for (const client of getWsClients()) {
+      client.send(JSON.stringify(updateWinnersResponse))
+    }
+  }
 }
