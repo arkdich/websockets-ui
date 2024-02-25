@@ -1,10 +1,10 @@
 import WebSocket from 'ws'
-import { RequestType } from '../lib/Request_d'
+import { MessageType } from '../lib/Request_d'
 import { routes } from './routes.ts'
 
-export const handleWsRequest = (
+export const handleMessage = (
   ws: WebSocket,
-  type: RequestType,
+  type: MessageType,
   data: unknown
 ) => {
   const requestHandler = routes[type]

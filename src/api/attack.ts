@@ -2,18 +2,22 @@ import {
   Attack,
   AttackResponse,
   Finish,
-  RequestParams,
-  WSRequest,
+  MessageParams,
+  Message,
 } from '../lib/Request_d.ts'
 import { RoomDb } from '../db/room-db.ts'
 import { GameDb } from '../db/game-db.ts'
-import { getClosestCells, isCoordinateMatches } from '../lib/utils.ts'
+import {
+  getClosestCells,
+  isCoordinateMatches,
+  sendResponse,
+} from '../lib/utils.ts'
 import { PlayerShip } from '../db/game-db_d.ts'
 import { updateWinners } from '../lib/update-winners.ts'
 import { getWsClients } from '../index.ts'
 import { UserDb } from '../db/user-db.ts'
 
-export const attack = ({ data }: RequestParams) => {
+export const attack = ({ data }: MessageParams) => {
   const { gameId, indexPlayer, x, y } = (
     typeof data === 'string' ? JSON.parse(data) : data
   ) as Attack
@@ -63,7 +67,7 @@ export const attack = ({ data }: RequestParams) => {
   game.playerTurn = shootStatus !== 'miss' ? indexPlayer : opponent.id
 
   room.users.forEach((ws) => {
-    const attackResponse: WSRequest<string> = {
+    const attackResponse: Message<string> = {
       type: 'attack',
       data: JSON.stringify({
         currentPlayer: indexPlayer,
@@ -73,13 +77,13 @@ export const attack = ({ data }: RequestParams) => {
       id: 0,
     }
 
-    ws.send(JSON.stringify(attackResponse))
+    sendResponse(ws, attackResponse)
 
     if (shootStatus === 'killed' && destroyedShip) {
       const cells = getClosestCells(destroyedShip)
 
       cells.forEach((cell) => {
-        const destroyedShipResponse: WSRequest<string> = {
+        const destroyedShipResponse: Message<string> = {
           type: 'attack',
           data: JSON.stringify({
             currentPlayer: indexPlayer,
@@ -89,30 +93,26 @@ export const attack = ({ data }: RequestParams) => {
           id: 0,
         }
 
-        ws.send(JSON.stringify(destroyedShipResponse))
+        sendResponse(ws, destroyedShipResponse)
       })
     }
 
     if (allShipsDestroyed) {
-      ws.send(
-        JSON.stringify({
-          type: 'finish',
-          data: JSON.stringify({
-            winPlayer: indexPlayer,
-          } as Finish),
-          id: 0,
-        })
-      )
+      sendResponse(ws, {
+        type: 'finish',
+        data: JSON.stringify({
+          winPlayer: indexPlayer,
+        } as Finish),
+        id: 0,
+      })
     } else {
-      ws.send(
-        JSON.stringify({
-          type: 'turn',
-          data: JSON.stringify({
-            currentPlayer: game.playerTurn,
-          }),
-          id: 0,
-        })
-      )
+      sendResponse(ws, {
+        type: 'turn',
+        data: JSON.stringify({
+          currentPlayer: game.playerTurn,
+        }),
+        id: 0,
+      })
     }
   })
 
@@ -121,14 +121,14 @@ export const attack = ({ data }: RequestParams) => {
     userDb.incrementWins(indexPlayer)
 
     const winnersScore = updateWinners()
-    const updateWinnersResponse: WSRequest<string> = {
+    const updateWinnersResponse: Message<string> = {
       type: 'update_winners',
       data: JSON.stringify(winnersScore),
       id: 0,
     }
 
     for (const client of getWsClients()) {
-      client.send(JSON.stringify(updateWinnersResponse))
+      sendResponse(client, updateWinnersResponse)
     }
   }
 }

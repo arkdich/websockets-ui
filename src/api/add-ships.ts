@@ -1,9 +1,10 @@
 import { ConnectedClients } from '../db/connected-clients.ts'
-import { AddShips, RequestParams, WSRequest } from '../lib/Request_d.ts'
+import { AddShips, MessageParams, Message } from '../lib/Request_d.ts'
 import { RoomDb } from '../db/room-db.ts'
 import { GameDb } from '../db/game-db.ts'
+import { sendResponse } from '../lib/utils.ts'
 
-export const addShips = ({ data }: RequestParams) => {
+export const addShips = ({ data }: MessageParams) => {
   const { gameId, ships, indexPlayer } = (
     typeof data === 'string' ? JSON.parse(data) : data
   ) as AddShips
@@ -33,7 +34,7 @@ export const addShips = ({ data }: RequestParams) => {
       throw new Error('User not found')
     }
 
-    const createGameResponse: WSRequest<string> = {
+    const createGameResponse: Message<string> = {
       type: 'create_game',
       data: JSON.stringify({
         idGame: game.id,
@@ -42,7 +43,7 @@ export const addShips = ({ data }: RequestParams) => {
       id: 0,
     }
 
-    ws.send(JSON.stringify(createGameResponse))
+    sendResponse(ws, createGameResponse)
   })
 
   if (game.players.length === 2) {
@@ -61,7 +62,7 @@ export const addShips = ({ data }: RequestParams) => {
         throw new Error('Player not found')
       }
 
-      const startGameResponse: WSRequest<string> = {
+      const startGameResponse: Message<string> = {
         type: 'start_game',
         data: JSON.stringify({
           ships: player.ships,
@@ -70,7 +71,7 @@ export const addShips = ({ data }: RequestParams) => {
         id: 0,
       }
 
-      const turnResponse: WSRequest<string> = {
+      const turnResponse: Message<string> = {
         type: 'turn',
         data: JSON.stringify({
           currentPlayer: game.playerTurn,
@@ -78,8 +79,8 @@ export const addShips = ({ data }: RequestParams) => {
         id: 0,
       }
 
-      ws.send(JSON.stringify(startGameResponse))
-      ws.send(JSON.stringify(turnResponse))
+      sendResponse(ws, startGameResponse)
+      sendResponse(ws, turnResponse)
     })
   }
 }

@@ -1,12 +1,12 @@
-import WebSocket from 'ws'
 import { ConnectedClients } from '../db/connected-clients.ts'
 import { updateRoom } from '../lib/update-room.ts'
-import { AddUserToRoom, RequestParams, WSRequest } from '../lib/Request_d.ts'
+import { AddUserToRoom, MessageParams, Message } from '../lib/Request_d.ts'
 import { RoomDb } from '../db/room-db.ts'
 import { GameDb } from '../db/game-db.ts'
 import { getWsClients } from '../index.ts'
+import { sendResponse } from '../lib/utils.ts'
 
-export const addUserToRoom = ({ ws, data }: RequestParams) => {
+export const addUserToRoom = ({ ws, data }: MessageParams) => {
   const { indexRoom } = (
     typeof data === 'string' ? JSON.parse(data) : data
   ) as AddUserToRoom
@@ -26,14 +26,14 @@ export const addUserToRoom = ({ ws, data }: RequestParams) => {
   const game = gameDb.create(indexRoom)
 
   const availableRooms = updateRoom(ws)
-  const updateRoomResponse: WSRequest<string> = {
+  const updateRoomResponse: Message<string> = {
     type: 'update_room',
     data: JSON.stringify(availableRooms),
     id: 0,
   }
 
   for (const client of getWsClients()) {
-    client.send(JSON.stringify(updateRoomResponse))
+    sendResponse(client, updateRoomResponse)
   }
 
   room.users.forEach((ws) => {
@@ -43,7 +43,7 @@ export const addUserToRoom = ({ ws, data }: RequestParams) => {
       throw new Error('User not found')
     }
 
-    const createGameResponse: WSRequest<string> = {
+    const createGameResponse: Message<string> = {
       type: 'create_game',
       data: JSON.stringify({
         idGame: game.id,
@@ -52,6 +52,6 @@ export const addUserToRoom = ({ ws, data }: RequestParams) => {
       id: 0,
     }
 
-    ws.send(JSON.stringify(createGameResponse))
+    sendResponse(ws, createGameResponse)
   })
 }

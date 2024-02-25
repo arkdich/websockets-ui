@@ -1,18 +1,19 @@
-import { Registration, RequestParams, WSRequest } from '../lib/Request_d.ts'
+import { Registration, MessageParams, Message } from '../lib/Request_d.ts'
 import { ConnectedClients } from '../db/connected-clients.ts'
 import { updateWinners } from '../lib/update-winners.ts'
 import { handleUser } from '../lib/handle-user.ts'
 import { updateRoom } from '../lib/update-room.ts'
 import { getWsClients } from '../index.ts'
+import { sendResponse } from '../lib/utils.ts'
 
-export const reg = ({ ws, data }: RequestParams) => {
+export const reg = ({ ws, data }: MessageParams) => {
   const { name, password } = (
     typeof data === 'string' ? JSON.parse(data) : data
   ) as Registration
 
   try {
     const user = handleUser({ name, password })
-    const regResponse: WSRequest<string> = {
+    const regResponse: Message<string> = {
       type: 'reg',
       data: JSON.stringify({
         name: user.name,
@@ -26,9 +27,9 @@ export const reg = ({ ws, data }: RequestParams) => {
     const clients = new ConnectedClients()
     clients.add(ws, user)
 
-    ws.send(JSON.stringify(regResponse))
+    sendResponse(ws, regResponse)
   } catch (err: any) {
-    const regResponse: WSRequest<string> = {
+    const regResponse: Message<string> = {
       type: 'reg',
       data: JSON.stringify({
         name,
@@ -39,25 +40,25 @@ export const reg = ({ ws, data }: RequestParams) => {
       id: 0,
     }
 
-    ws.send(JSON.stringify(regResponse))
+    sendResponse(ws, regResponse)
   }
 
   const winnersScore = updateWinners()
-  const updateWinnersResponse: WSRequest<string> = {
+  const updateWinnersResponse: Message<string> = {
     type: 'update_winners',
     data: JSON.stringify(winnersScore),
     id: 0,
   }
 
   const availableRooms = updateRoom(ws)
-  const updateRoomResponse: WSRequest<string> = {
+  const updateRoomResponse: Message<string> = {
     type: 'update_room',
     data: JSON.stringify(availableRooms),
     id: 0,
   }
 
   for (const client of getWsClients()) {
-    client.send(JSON.stringify(updateRoomResponse))
-    client.send(JSON.stringify(updateWinnersResponse))
+    sendResponse(client, updateRoomResponse)
+    sendResponse(client, updateWinnersResponse)
   }
 }

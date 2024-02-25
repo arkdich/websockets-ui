@@ -1,8 +1,8 @@
-import { RandomAttack, RequestParams } from '../lib/Request_d.ts'
+import { RandomAttack, MessageParams } from '../lib/Request_d.ts'
 import { getRandomCoordinate } from '../lib/utils.ts'
 import { attack } from './attack.ts'
 
-export const randomAttack = ({ ws, data }: RequestParams) => {
+export const randomAttack = ({ ws, data }: MessageParams) => {
   const { gameId, indexPlayer } = (
     typeof data === 'string' ? JSON.parse(data) : data
   ) as RandomAttack

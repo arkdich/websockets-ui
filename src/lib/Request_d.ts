@@ -2,22 +2,22 @@ import WebSocket from 'ws'
 import { User } from '../db/user-db_d'
 
 export type Route = {
-  type: RequestType
-  handler: (params: RequestParams) => void
+  type: MessageType
+  handler: (params: MessageParams) => void
 }
 
-export type RequestParams = {
+export type MessageParams = {
   ws: WebSocket
   data?: unknown
 }
 
-export type WSRequest<Body = unknown> = {
-  type: RequestType
+export type Message<Body = unknown> = {
+  type: MessageType
   data: Body
   id: 0
 }
 
-export type RequestType =
+export type MessageType =
   | 'reg'
   | 'update_winners'
   | 'create_room'

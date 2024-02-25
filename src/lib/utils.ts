@@ -1,5 +1,6 @@
+import WebSocket from 'ws'
 import { PlayerShip } from '../db/game-db_d'
-import { Ship } from './Request_d'
+import { Ship, Message } from './Request_d'
 
 export const getRandomCoordinate = () => {
   return Math.floor(Math.random() * 10)
@@ -49,4 +50,9 @@ export const getClosestCells = (ship: PlayerShip) => {
   }
 
   return cells
+}
+
+export const sendResponse = (ws: WebSocket, response: Message<string>) => {
+  console.log('Server response:\n', response)
+  ws.send(JSON.stringify(response))
 }

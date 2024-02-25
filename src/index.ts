@@ -1,8 +1,8 @@
 import 'dotenv/config'
 import { httpServer } from './http-server/index.ts'
 import { WebSocketServer } from 'ws'
-import { WSRequest } from './lib/Request_d.ts'
-import { handleWsRequest } from './api/handle-ws-request.ts'
+import { Message } from './lib/Request_d.ts'
+import { handleMessage } from './api/handle-ws-request.ts'
 
 const HTTP_PORT = Number(process.env.HTTP_PORT) || 8181
 const WS_PORT = Number(process.env.WS_PORT) || 3000
@@ -20,13 +20,16 @@ wsServer.on('listening', () => {
 })
 
 wsServer.on('connection', (ws) => {
-  ws.send(JSON.stringify({ message: 'Successfully connected' }))
+  console.log(
+    `Client successfully connected, total clients: ${wsServer.clients.size}`
+  )
 
   ws.on('message', (buffer) => {
     try {
-      const { type, data } = JSON.parse(buffer.toString()) as WSRequest<string>
+      const request = JSON.parse(buffer.toString()) as Message<string>
+      console.log('Client request:\n', request)
 
-      handleWsRequest(ws, type, data)
+      handleMessage(ws, request.type, request.data)
     } catch (err: any) {
       ws.send(JSON.stringify({ message: err.message }))
     }
