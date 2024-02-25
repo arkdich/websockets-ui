@@ -1,7 +1,9 @@
 import { RequestType, Route } from '../lib/Request_d.ts'
 import { addShips } from './add-ships.ts'
 import { addUserToRoom } from './add-user-to-room.ts'
+import { attack } from './attack.ts'
 import { createRoom } from './create-room.ts'
+import { randomAttack } from './random-attack.ts'
 import { reg } from './reg.ts'
 
 export const routes: Partial<Record<RequestType, Route>> = {
@@ -21,5 +23,13 @@ export const routes: Partial<Record<RequestType, Route>> = {
   add_ships: {
     type: 'add_ships',
     handler: addShips,
+  },
+  attack: {
+    type: 'attack',
+    handler: attack,
+  },
+  randomAttack: {
+    type: 'randomAttack',
+    handler: randomAttack,
   },
 }

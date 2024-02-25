@@ -21,6 +21,9 @@ export type RequestType =
   | 'create_game'
   | 'add_ships'
   | 'start_game'
+  | 'turn'
+  | 'attack'
+  | 'randomAttack'
 
 export type Registration = {
   name: string
@@ -70,4 +73,28 @@ export type Ship = {
   direction: boolean
   length: number
   type: 'small' | 'medium' | 'large' | 'huge'
+}
+
+export type Turn = {
+  currentPlayer: number | string
+}
+
+export type Attack = {
+  gameId: number | string
+  x: number
+  y: number
+  indexPlayer: number | string
+}
+
+export type AttackResponse = {
+  position: {
+    x: number
+    y: number
+  }
+  currentPlayer: number | string
+  status: 'miss' | 'killed' | 'shot'
+}
+export type RandomAttack = {
+  gameId: number | string
+  indexPlayer: number | string
 }

@@ -6,7 +6,7 @@ export class GameDb {
 
   create(roomId: number) {
     const id = GameDb.games.length + 1
-    const game: Game = { id, roomId, players: [] }
+    const game: Game = { id, roomId, players: [], playerTurn: null }
 
     GameDb.games.push(game)
 

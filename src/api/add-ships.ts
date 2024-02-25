@@ -47,6 +47,8 @@ export const addShips = (ws: WebSocket, data: unknown) => {
   })
 
   if (game.players.length === 2) {
+    game.playerTurn = game.players[0].id
+
     room.users.forEach((ws) => {
       const user = clients.get(ws)
 
@@ -69,7 +71,16 @@ export const addShips = (ws: WebSocket, data: unknown) => {
         id: 0,
       }
 
+      const turnResponse: WSRequest<string> = {
+        type: 'turn',
+        data: JSON.stringify({
+          currentPlayer: game.playerTurn,
+        }),
+        id: 0,
+      }
+
       ws.send(JSON.stringify(startGameResponse))
+      ws.send(JSON.stringify(turnResponse))
     })
   }
 }
