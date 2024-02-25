@@ -18,6 +18,16 @@ export class UserDb {
     return user
   }
 
+  incrementWins(id: number | string) {
+    const user = UserDb.users.find((user) => user.id === id)
+
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    user.wins += 1
+  }
+
   get(name: string) {
     const user = UserDb.users.find((user) => user.name === name)
 

@@ -24,6 +24,7 @@ export type RequestType =
   | 'turn'
   | 'attack'
   | 'randomAttack'
+  | 'finish'
 
 export type Registration = {
   name: string
@@ -94,7 +95,12 @@ export type AttackResponse = {
   currentPlayer: number | string
   status: 'miss' | 'killed' | 'shot'
 }
+
 export type RandomAttack = {
   gameId: number | string
   indexPlayer: number | string
+}
+
+export type Finish = {
+  winPlayer: number | string
 }

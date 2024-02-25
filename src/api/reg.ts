@@ -4,6 +4,7 @@ import { ConnectedClients } from '../db/connected-clients.ts'
 import { updateWinners } from '../lib/update-winners.ts'
 import { handleUser } from '../lib/handle-user.ts'
 import { updateRoom } from '../lib/update-room.ts'
+import { getWsClients } from '../index.ts'
 
 export const reg = (ws: WebSocket, data: unknown) => {
   const { name, password } = (
@@ -49,8 +50,6 @@ export const reg = (ws: WebSocket, data: unknown) => {
     id: 0,
   }
 
-  ws.send(JSON.stringify(updateWinnersResponse))
-
   const availableRooms = updateRoom(ws)
   const updateRoomResponse: WSRequest<string> = {
     type: 'update_room',
@@ -58,5 +57,8 @@ export const reg = (ws: WebSocket, data: unknown) => {
     id: 0,
   }
 
-  ws.send(JSON.stringify(updateRoomResponse))
+  for (const client of getWsClients()) {
+    client.send(JSON.stringify(updateRoomResponse))
+    client.send(JSON.stringify(updateWinnersResponse))
+  }
 }

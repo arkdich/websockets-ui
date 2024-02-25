@@ -1,9 +1,12 @@
 import WebSocket from 'ws'
-import { Attack, AttackResponse, WSRequest } from '../lib/Request_d.ts'
+import { Attack, AttackResponse, Finish, WSRequest } from '../lib/Request_d.ts'
 import { RoomDb } from '../db/room-db.ts'
 import { GameDb } from '../db/game-db.ts'
 import { getClosestCells, isCoordinateMatches } from '../lib/utils.ts'
 import { PlayerShip } from '../db/game-db_d.ts'
+import { updateWinners } from '../lib/update-winners.ts'
+import { getWsClients } from '../index.ts'
+import { UserDb } from '../db/user-db.ts'
 
 export const attack = (ws: WebSocket, data: unknown) => {
   const { gameId, indexPlayer, x, y } = (
@@ -51,6 +54,7 @@ export const attack = (ws: WebSocket, data: unknown) => {
     }
   })
 
+  const allShipsDestroyed = opponent.ships.every((ship) => ship.health === 0)
   game.playerTurn = shootStatus !== 'miss' ? indexPlayer : opponent.id
 
   room.users.forEach((ws) => {
@@ -66,7 +70,7 @@ export const attack = (ws: WebSocket, data: unknown) => {
 
     ws.send(JSON.stringify(attackResponse))
 
-    if (destroyedShip) {
+    if (shootStatus === 'killed' && destroyedShip) {
       const cells = getClosestCells(destroyedShip)
 
       cells.forEach((cell) => {
@@ -84,14 +88,42 @@ export const attack = (ws: WebSocket, data: unknown) => {
       })
     }
 
-    ws.send(
-      JSON.stringify({
-        type: 'turn',
-        data: JSON.stringify({
-          currentPlayer: game.playerTurn,
-        }),
+    if (allShipsDestroyed) {
+      ws.send(
+        JSON.stringify({
+          type: 'finish',
+          data: JSON.stringify({
+            winPlayer: indexPlayer,
+          } as Finish),
+          id: 0,
+        })
+      )
+    } else {
+      ws.send(
+        JSON.stringify({
+          type: 'turn',
+          data: JSON.stringify({
+            currentPlayer: game.playerTurn,
+          }),
+          id: 0,
+        })
+      )
+    }
+
+    if (allShipsDestroyed) {
+      const userDb = new UserDb()
+      userDb.incrementWins(indexPlayer)
+
+      const winnersScore = updateWinners()
+      const updateWinnersResponse: WSRequest<string> = {
+        type: 'update_winners',
+        data: JSON.stringify(winnersScore),
         id: 0,
-      })
-    )
+      }
+
+      for (const client of getWsClients()) {
+        client.send(JSON.stringify(updateWinnersResponse))
+      }
+    }
   })
 }
