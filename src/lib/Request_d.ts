@@ -18,6 +18,9 @@ export type RequestType =
   | 'create_room'
   | 'update_room'
   | 'add_user_to_room'
+  | 'create_game'
+  | 'add_ships'
+  | 'start_game'
 
 export type Registration = {
   name: string
@@ -46,4 +49,25 @@ export type UpdateRoom = {
     name: string
     index: number
   }[]
+}
+
+export type CreateGame = {
+  idGame: number | string
+  idPlayer: number | string
+}
+
+export type AddShips = {
+  gameId: number | string
+  ships: Ship[]
+  indexPlayer: number | string
+}
+
+export type Ship = {
+  position: {
+    x: number
+    y: number
+  }
+  direction: boolean
+  length: number
+  type: 'small' | 'medium' | 'large' | 'huge'
 }

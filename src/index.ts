@@ -32,3 +32,7 @@ wsServer.on('connection', (ws) => {
     }
   })
 })
+
+export const getWsClients = () => {
+  return wsServer.clients.values()
+}

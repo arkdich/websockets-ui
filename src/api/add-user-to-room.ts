@@ -3,6 +3,8 @@ import { ConnectedClients } from '../db/connected-clients.ts'
 import { updateRoom } from '../lib/update-room.ts'
 import { AddUserToRoom, WSRequest } from '../lib/Request_d.ts'
 import { RoomDb } from '../db/room-db.ts'
+import { GameDb } from '../db/game-db.ts'
+import { getWsClients } from '../index.ts'
 
 export const addUserToRoom = (ws: WebSocket, data: unknown) => {
   const { indexRoom } = (
@@ -10,16 +12,18 @@ export const addUserToRoom = (ws: WebSocket, data: unknown) => {
   ) as AddUserToRoom
 
   const clients = new ConnectedClients()
-  const user = clients.get(ws)
 
-  console.log(data)
+  const roomDb = new RoomDb()
+  const room = roomDb.get(indexRoom)
 
-  if (!user) {
-    throw new Error('User not found')
+  if (!room) {
+    throw new Error(`Room with id ${indexRoom} not found`)
   }
 
-  const room = new RoomDb()
-  room.addUser(indexRoom, ws)
+  roomDb.addUser(indexRoom, ws)
+
+  const gameDb = new GameDb()
+  const game = gameDb.create(indexRoom)
 
   const availableRooms = updateRoom(ws)
   const updateRoomResponse: WSRequest<string> = {
@@ -28,5 +32,26 @@ export const addUserToRoom = (ws: WebSocket, data: unknown) => {
     id: 0,
   }
 
-  ws.send(JSON.stringify(updateRoomResponse))
+  for (const client of getWsClients()) {
+    client.send(JSON.stringify(updateRoomResponse))
+  }
+
+  room.users.forEach((ws) => {
+    const user = clients.get(ws)
+
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    const createGameResponse: WSRequest<string> = {
+      type: 'create_game',
+      data: JSON.stringify({
+        idGame: game.id,
+        idPlayer: user.id,
+      }),
+      id: 0,
+    }
+
+    ws.send(JSON.stringify(createGameResponse))
+  })
 }

@@ -25,6 +25,10 @@ export class RoomDb {
     return room
   }
 
+  get(id: number) {
+    return RoomDb.rooms.find((room) => room.id === id) ?? null
+  }
+
   getAll() {
     return RoomDb.rooms
   }

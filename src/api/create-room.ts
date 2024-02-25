@@ -3,6 +3,7 @@ import { setupRoom } from '../lib/setup-room.ts'
 import { ConnectedClients } from '../db/connected-clients.ts'
 import { updateRoom } from '../lib/update-room.ts'
 import { WSRequest } from '../lib/Request_d.ts'
+import { getWsClients } from '../index.ts'
 
 export const createRoom = (ws: WebSocket) => {
   const clients = new ConnectedClients()
@@ -21,5 +22,7 @@ export const createRoom = (ws: WebSocket) => {
     id: 0,
   }
 
-  ws.send(JSON.stringify(updateRoomResponse))
+  for (const client of getWsClients()) {
+    client.send(JSON.stringify(updateRoomResponse))
+  }
 }
