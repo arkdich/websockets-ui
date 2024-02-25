@@ -20,7 +20,9 @@ export class GameDb {
       throw new Error(`Game with id ${gameId} not found`)
     }
 
-    const player = { id: playerId, ships: ships }
+    const playerShips = ships.map((ship) => ({ ...ship, health: ship.length }))
+
+    const player = { id: playerId, ships: playerShips }
     game.players.push(player)
 
     return player

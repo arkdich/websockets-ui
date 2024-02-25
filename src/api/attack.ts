@@ -2,6 +2,8 @@ import WebSocket from 'ws'
 import { Attack, AttackResponse, WSRequest } from '../lib/Request_d.ts'
 import { RoomDb } from '../db/room-db.ts'
 import { GameDb } from '../db/game-db.ts'
+import { getClosestCells, isCoordinateMatches } from '../lib/utils.ts'
+import { PlayerShip } from '../db/game-db_d.ts'
 
 export const attack = (ws: WebSocket, data: unknown) => {
   const { gameId, indexPlayer, x, y } = (
@@ -32,45 +34,64 @@ export const attack = (ws: WebSocket, data: unknown) => {
     throw new Error('Enemy ships not found')
   }
 
-  let hit = false
+  let shootStatus: AttackResponse['status'] = 'miss'
+  let destroyedShip: PlayerShip | null = null
 
   opponent.ships.forEach((ship) => {
-    if (ship.direction) {
-      if (
-        ship.position.x === x &&
-        y <= ship.position.y + ship.length &&
-        y >= ship.position.y
-      ) {
-        hit = true
+    const isMatches = isCoordinateMatches(ship, x, y)
+
+    if (isMatches) {
+      shootStatus = 'shot'
+      ship.health -= 1
+
+      if (ship.health === 0) {
+        shootStatus = 'killed'
+        destroyedShip = ship
       }
     }
   })
 
-  const attackResponse: WSRequest<string> = {
-    type: 'attack',
-    data: JSON.stringify({
-      currentPlayer: indexPlayer,
-      position: { x, y },
-      status: hit ? 'shot' : 'miss',
-    } as AttackResponse),
-    id: 0,
-  }
-
-  game.playerTurn = hit ? indexPlayer : opponent.id
+  game.playerTurn = shootStatus !== 'miss' ? indexPlayer : opponent.id
 
   room.users.forEach((ws) => {
+    const attackResponse: WSRequest<string> = {
+      type: 'attack',
+      data: JSON.stringify({
+        currentPlayer: indexPlayer,
+        position: { x, y },
+        status: shootStatus,
+      } as AttackResponse),
+      id: 0,
+    }
+
     ws.send(JSON.stringify(attackResponse))
+
+    if (destroyedShip) {
+      const cells = getClosestCells(destroyedShip)
+
+      cells.forEach((cell) => {
+        const destroyedShipResponse: WSRequest<string> = {
+          type: 'attack',
+          data: JSON.stringify({
+            currentPlayer: indexPlayer,
+            position: { x: cell.x, y: cell.y },
+            status: 'miss',
+          } as AttackResponse),
+          id: 0,
+        }
+
+        ws.send(JSON.stringify(destroyedShipResponse))
+      })
+    }
+
     ws.send(
       JSON.stringify({
         type: 'turn',
         data: JSON.stringify({
-          currentPlayer: hit ? indexPlayer : opponent.id,
+          currentPlayer: game.playerTurn,
         }),
         id: 0,
       })
     )
   })
 }
-
-// x, y start from 0
-// direction: false - horizontal, true - vertical

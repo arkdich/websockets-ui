@@ -70,7 +70,7 @@ export type Ship = {
     x: number
     y: number
   }
-  direction: boolean
+  direction: boolean // false - horizontal, true - vertical
   length: number
   type: 'small' | 'medium' | 'large' | 'huge'
 }
